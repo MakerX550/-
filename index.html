@@ -1,1 +1,126 @@
-<h1>안녕</h1>
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>체크메이트 — AI 건강 자가진단</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <img class="logo" src="assets/img/logo.png" alt="logo">
+      <div>
+        <h1>AI 건강 자가진단 (텍스트)</h1>
+        <div class="subtitle">증상 선택 → GPT에 붙여넣을 텍스트 자동 생성</div>
+      </div>
+    </div>
+    <div class="muted small">본 도구는 의학적 진단을 제공하지 않습니다.</div>
+  </header>
+
+  <div class="layout">
+
+    <!-- LEFT: 설정 -->
+    <div class="card">
+      <div class="section-title">1) 검사 설정</div>
+
+      <div style="margin-bottom:10px">
+        <div class="muted">검사 난이도</div>
+        <div class="row" style="margin-top:8px">
+          <button class="mode-btn" id="modeSimple">간단 검사</button>
+          <button class="mode-btn" id="modeDeep">정밀 검사</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="muted">성별</div>
+        <div class="row" style="margin-top:8px">
+          <button class="gender-btn" id="maleBtn">남자</button>
+          <button class="gender-btn" id="femaleBtn">여자</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="muted">나이</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+          <input type="range" id="ageRange" min="0" max="120" value="30" class="range">
+          <input type="number" id="ageNum" min="0" max="120" value="30">
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="muted">기저질환(선택)</div>
+        <div class="row" style="margin-top:8px">
+          <label><input type="checkbox" id="chronic1"> 고혈압</label>
+          <label><input type="checkbox" id="chronic2"> 당뇨</label>
+          <label><input type="checkbox" id="chronic3"> 심질환</label>
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <div class="section-title">선택한 증상</div>
+        <div id="selectedChips" class="chips"></div>
+
+        <div style="margin-top:10px">
+          <button class="generate-btn" id="btnGenerate">GPT에 보낼 내용 만들기 (복사)</button>
+          <div id="copyNote" class="copy-note">복사 완료 — GPT창에 붙여넣기 하세요.</div>
+        </div>
+      </div>
+
+      <div class="ad-slot" style="margin-top:16px">광고 슬롯 (좌측 하단)</div>
+    </div>
+
+    <!-- CENTER: 증상 검색 + 리스트 -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="section-title">2) 증상 선택 (카테고리)</div>
+          <div class="muted">카테고리 선택 → 아래에서 세부 증상 체크 (우클릭/롱프레스 = 자세히 보기)</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input id="quickSearch" class="searchbar" placeholder="증상검색 (예: 기침, 두통, 복통)" />
+        </div>
+      </div>
+
+      <div class="category-row" id="categoryRow"></div>
+
+      <div class="symptom-list" id="symptomList" tabindex="0"></div>
+
+      <div style="margin-top:12px" class="muted">우클릭 또는 모바일 롱프레스 → 증상별 상세 설명 보기</div>
+    </div>
+
+    <!-- RIGHT: 고급 입력 & 질환 추천 -->
+    <div class="card">
+      <div class="section-title">3) 고급 입력 / 의심 질환(자동 추천)</div>
+      <div class="muted">직접 증상 입력 또는 자동 추천된 의심 질환을 확인하세요.</div>
+      <textarea id="advancedInput" placeholder="예: 2주전부터 시작한 지속적 기침, 가래에 혈이 섞임..." ></textarea>
+
+      <div style="margin-top:12px">
+        <div class="section-title">자동 추천 의심 질환</div>
+        <div id="recommendedDiseases" class="chips muted small">추천 질환이 여기에 표시됩니다.</div>
+      </div>
+
+      <div style="margin-top:12px" class="section-title">광고(우측)</div>
+      <div class="ad-slot">광고 슬롯 (우측)</div>
+    </div>
+
+  </div>
+
+  <footer class="footer-muted footer">
+    이 도구는 의학적 진단을 제공하지 않습니다. 긴급 상황(호흡곤란, 의식 소실, 심한 흉통 등) 시 즉시 응급실을 방문하세요.
+  </footer>
+
+</div>
+
+<!-- 상세보기 모달 -->
+<div id="detailModal" class="detail-modal" role="dialog" aria-hidden="true" aria-labelledby="detailTitle" aria-describedby="detailContent">
+  <button class="close" aria-label="닫기 (모달)" title="닫기">✕</button>
+  <div class="title" id="detailTitle"></div>
+  <div class="content" id="detailContent"></div>
+</div>
+
+<script src="assets/js/app.js"></script>
+</body>
+</html>
