@@ -74,26 +74,7 @@ function initUI(){
   bindControls();
 }
 
-// 카테고리 라벨
-function categoryLabel(key){
-  const map = {
-    head: '머리/얼굴',
-    neck: '목',
-    upper: '상체(가슴/팔)',
-    lower: '하체(복부/다리)',
-    general: '전신',
-    neuro: '신경계',
-    ent: '이비인후과',
-    derm: '피부과',
-    gyn: '부인과',
-    uro: '비뇨의학과',
-    eye: '안과'
-  };
-  return map[key] || key;
-}
-
-// 렌더링 및 기타 함수 생략(상기와 동일)...
-// (원하시면 나머지 함수도 전체 붙여드립니다)
+// 나머지 함수들(렌더/추천/모달/handleGenerate 등)은 앞에서 제공한 전체 구현과 동일합니다.
 
 document.addEventListener('DOMContentLoaded', ()=>{
   loadData();
