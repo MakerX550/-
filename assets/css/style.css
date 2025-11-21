@@ -77,15 +77,16 @@ button.generate-fallback{margin-top:8px;padding:8px 10px;border-radius:8px;backg
   cursor: pointer;
   pointer-events: auto;
 }
-.ad-fallback {
-  background:#fffbe6;
-  border:1px dashed #ffd966;
-  padding:10px;
-  border-radius:8px;
-  color:#704800;
-  font-size:13px;
-  text-align:center;
-  pointer-events:auto;
+/* 빨간 대체 박스 (요청하신 강조 색상) */
+.ad-fallback-red {
+  background: #ff4d4f; /* 밝은 빨강 */
+  color: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  font-weight: 700;
+  text-align: center;
+  max-width: 140px;
+  pointer-events: auto;
 }
 @media (max-width:900px){
   .ad-overlay { display:none; }
