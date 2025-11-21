@@ -33,7 +33,7 @@ input[type=number]{width:110px;padding:8px;border-radius:8px;border:1px solid #e
 .symptom-item:hover{transform:translateY(-2px)}
 .symptom-item input{width:18px;height:18px}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.chip{background:var(--chip-bg);color:var(--primary);Padding:6px 10px;border-radius:999px;font-weight:700;cursor:pointer}
+.chip{background:var(--chip-bg);color:var(--primary);padding:6px 10px;border-radius:999px;font-weight:700;cursor:pointer}
 .ad-slot{background:#fffbe6;border:1px dashed #ffd966;padding:12px;border-radius:10px;text-align:center;color:#704800;margin-top:12px}
 .detail-modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:760px;max-width:94%;background:white;padding:18px;border-radius:12px;box-shadow:0 20px 60px rgba(2,6,23,.35);display:none;z-index:1200}
 .detail-modal .title{font-weight:800;margin-bottom:8px}
