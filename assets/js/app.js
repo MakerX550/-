@@ -16,7 +16,7 @@ const App = {
   }
 };
 
-// 초기 DOM 캐시
+// DOM 캐시
 const symptomList = $id('symptomList');
 const categoryRow = $id('categoryRow');
 const quickSearch = $id('quickSearch');
@@ -31,31 +31,27 @@ const advancedInput = $id('advancedInput');
 const ageRange = $id('ageRange');
 const ageNum = $id('ageNum');
 
-// 데이터 로드
+// 데이터 로드 (상대경로 사용)
 async function loadData(){
   try{
-    // index.html, assets/, data/ 가 같은 루트에 있을 때 안전한 상대경로 사용
     const base = './';
     const [symRes, disRes] = await Promise.all([
       fetch(base + 'data/symptoms.json'),
       fetch(base + 'data/disease_map.json')
     ]);
-
-    // 상태 체크(404 등 명확히 잡기)
     if(!symRes.ok || !disRes.ok){
       throw new Error(`fetch error: symptoms ${symRes.status}, disease_map ${disRes.status}`);
     }
-
     App.data.symptoms = await symRes.json();
     App.data.diseaseMap = await disRes.json();
     initUI();
   }catch(e){
     console.error('데이터 로드 실패(경로/파일/서버 확인 필요):', e);
-    alert('데이터 로드에 실패했습니다. 개발자 도구의 Network/Console 로그를 확인해주세요.');
+    alert('데이터 로드에 실패했습니다. 개발자도구 Console/Network를 확인해 주세요.');
   }
 }
 
-// UI 초기화 (카테고리 버튼 생성 등)
+// UI 초기화
 function initUI(){
   const cats = Object.keys(App.data.symptoms);
   categoryRow.innerHTML = '';
@@ -72,14 +68,13 @@ function initUI(){
     });
     categoryRow.appendChild(btn);
   });
-  // 초기 하이라이트
   document.querySelectorAll('.cat-btn').forEach(b=>b.style.opacity = b.dataset.cat === App.state.currentCategory ? 1 : 0.6);
   renderSymptoms();
   refreshChips();
   bindControls();
 }
 
-// 카테고리 라벨(가독성용)
+// 카테고리 라벨
 function categoryLabel(key){
   const map = {
     head: '머리/얼굴',
@@ -97,7 +92,7 @@ function categoryLabel(key){
   return map[key] || key;
 }
 
-// 렌더링 (DocumentFragment 사용)
+// 렌더링
 function renderSymptoms(filter=''){
   symptomList.innerHTML = '';
   const list = App.data.symptoms[App.state.currentCategory] || [];
@@ -121,14 +116,12 @@ function renderSymptoms(filter=''){
       updateRecommendations();
     });
 
-    // 우클릭(PC) 상세보기
     label.addEventListener('contextmenu', (ev)=>{
       ev.preventDefault();
       openDetail(sym, getSymptomDetail(sym));
       return false;
     });
 
-    // 터치 롱프레스(모바일)
     let touchTimer = null;
     label.addEventListener('touchstart', (ev)=>{
       if(ev.touches.length > 1) return;
@@ -143,45 +136,41 @@ function renderSymptoms(filter=''){
   symptomList.appendChild(frag);
 }
 
-// 간단한 detail 텍스트(원본을 보완)
+// 간단한 detail 텍스트(추가 가능)
 function getSymptomDetail(sym){
-  // 원본 상세 설명이 파일에 있으면 사용, 없으면 기본 안내
   const details = {
     "기침(마른기침)":"기침의 종류를 명확히 하세요(마른기침/가래). 야간 기침·천명음·호흡곤란 여부 확인.",
     "기침(가래 동반)":"가래의 색(투명/황색/녹색/혈담)을 확인하세요. 혈담이면 추가 평가 필요.",
-    "가래(색 변화: 투명/황색/녹색/혈담)":"녹색/노란색은 세균 감염 가능성, 혈담은 즉시 평가 권장.",
-    // 필요 시 더 추가
+    "가래(색 변화: 투명/황색/녹색/혈담)":"녹색/노란색은 세균 감염 가능성, 혈담은 즉시 평가 권장."
   };
   return details[sym] || '';
 }
 
 // 칩 갱신
 function refreshChips(){
-  selectedChips.innerHTML = '';
+  const container = selectedChips;
+  container.innerHTML = '';
   if(App.state.selected.size === 0){
-    selectedChips.innerHTML = '<div class="muted">선택된 증상이 없습니다.</div>';
+    container.innerHTML = '<div class="muted">선택된 증상이 없습니다.</div>';
     return;
   }
-  App.state.selected.forEach(s=>{
+  App.state.selected.forEach(s => {
     const chip = document.createElement('button');
     chip.type = 'button';
     chip.className = 'chip';
     chip.innerText = s;
     chip.setAttribute('aria-label', `${s} 제거`);
-    chip.addEventListener('click', ()=>{
+    chip.addEventListener('click', () => {
       App.state.selected.delete(s);
-      // uncheck matching checkbox if present
-      document.querySelectorAll('#symptomList input[type="checkbox"]').forEach(inp=>{
-        if(inp.value === s) inp.checked = false;
-      });
+      document.querySelectorAll('#symptomList input[type="checkbox"]').forEach(inp=>{ if(inp.value === s) inp.checked = false; });
       refreshChips();
       updateRecommendations();
     });
-    selectedChips.appendChild(chip);
+    container.appendChild(chip);
   });
 }
 
-// 추천 의심질환 계산 (간단 키워드 매칭, 가중치 합산)
+// 추천 의심질환 계산
 function recommendDiseases(){
   const chosen = [...App.state.selected];
   const counter = new Map();
@@ -196,7 +185,6 @@ function recommendDiseases(){
       counter.set(d.name, {info: d, score});
     }
   });
-  // 정렬
   const sorted = [...counter.values()].sort((a,b)=>b.score - a.score);
   return sorted.slice(0,5).map(x=>x.info);
 }
@@ -214,9 +202,7 @@ function updateRecommendations(){
     btn.className = 'chip';
     btn.type = 'button';
     btn.innerText = r.name + ' · ' + r.dept;
-    // 사용자가 클릭하면 프롬프트에 포함되도록 토글
     btn.addEventListener('click', ()=>{
-      // 토글 선택 효과(간단)
       btn.classList.toggle('active');
       btn.style.opacity = btn.classList.contains('active') ? 0.9 : 1;
     });
@@ -262,44 +248,34 @@ function closeDetail(){
 
 // 핸들러 바인딩
 function bindControls(){
-  // 성별/모드
   const maleBtn = $id('maleBtn'), femaleBtn = $id('femaleBtn');
   const modeSimple = $id('modeSimple'), modeDeep = $id('modeDeep');
 
   if(maleBtn && femaleBtn){
-    maleBtn.addEventListener('click', ()=>{
-      maleBtn.classList.toggle('active', true); femaleBtn.classList.toggle('active', false);
-      App.state.gender = '남';
-    });
-    femaleBtn.addEventListener('click', ()=>{
-      femaleBtn.classList.toggle('active', true); maleBtn.classList.toggle('active', false);
-      App.state.gender = '여';
-    });
+    maleBtn.addEventListener('click', () => { maleBtn.classList.toggle('active', true); femaleBtn.classList.toggle('active', false); App.state.gender = '남'; });
+    femaleBtn.addEventListener('click', () => { femaleBtn.classList.toggle('active', true); maleBtn.classList.toggle('active', false); App.state.gender = '여'; });
   }
+
   if(modeSimple && modeDeep){
-    modeSimple.addEventListener('click', ()=>{ modeSimple.classList.toggle('active', true); modeDeep.classList.toggle('active', false); App.state.mode = '간단'; });
-    modeDeep.addEventListener('click', ()=>{ modeDeep.classList.toggle('active', true); modeSimple.classList.toggle('active', false); App.state.mode = '정밀'; });
+    modeSimple.addEventListener('click', () => { modeSimple.classList.toggle('active', true); modeDeep.classList.toggle('active', false); App.state.mode = '간단'; });
+    modeDeep.addEventListener('click', () => { modeDeep.classList.toggle('active', true); modeSimple.classList.toggle('active', false); App.state.mode = '정밀'; });
   }
 
-  // 나이 동기화
   if(ageRange && ageNum){
-    ageRange.addEventListener('input', ()=>{ ageNum.value = ageRange.value; });
-    ageNum.addEventListener('input', ()=>{ ageRange.value = ageNum.value; });
+    ageRange.addEventListener('input', () => { ageNum.value = ageRange.value; });
+    ageNum.addEventListener('input', () => { ageRange.value = ageNum.value; });
   }
 
-  // 검색
-  if(quickSearch) quickSearch.addEventListener('input', (e)=> renderSymptoms(e.target.value));
+  if(quickSearch) quickSearch.addEventListener('input', (e) => renderSymptoms(e.target.value));
 
-  // 모달 닫기
   const modalClose = detailModal.querySelector('.close');
   if(modalClose) modalClose.addEventListener('click', closeDetail);
-  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeDetail(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDetail(); });
 
-  // 생성 버튼
   if(btnGenerate) btnGenerate.addEventListener('click', handleGenerate);
 }
 
-// handleGenerate: 프롬프트 생성(질환 추천·진료과 포함) + 복사/모달 표시
+// handleGenerate: 텍스트 조합 및 복사(모달 대체 UI 포함)
 async function handleGenerate(){
   const gender = App.state.gender || '미상';
   const age = ageNum.value || '미입력';
@@ -313,7 +289,6 @@ async function handleGenerate(){
   const chosen = [...App.state.selected];
   const date = new Date().toLocaleString();
 
-  // 추천 질환 중 사용자가 활성화한 것(추천 UI에서 active된 버튼)
   const recButtons = recommendedDiseases.querySelectorAll('.chip');
   const chosenDiseases = [];
   recButtons.forEach(btn=>{
@@ -322,57 +297,53 @@ async function handleGenerate(){
       chosenDiseases.push(name);
     }
   });
-
-  // 만약 사용자가 선택한 추천이 없으면 자동 추천 상위 3개 포함
   const autoRecs = recommendDiseases().slice(0,3).map(d=>d.name);
   const finalDiseases = chosenDiseases.length ? chosenDiseases : autoRecs;
 
-  // 권장 진료과 집계 (중복 제거)
   const depts = new Set();
   App.data.diseaseMap.forEach(d=>{
     if(finalDiseases.includes(d.name)) depts.add(d.dept);
   });
 
-  // 텍스트 조립 (GPT에 바로 붙여넣을 템플릿)
   let text = `생성일: ${date}\n\n[기본정보]\n- 성별: ${gender}\n- 나이: ${age}\n- 검사모드: ${mode}\n- 기저질환: ${chronic.length ? chronic.join(', ') : '없음'}\n\n[선택 증상]\n`;
   if(chosen.length) text += chosen.map(s=>`- ${s}`).join('\n') + '\n';
   else text += '- 없음\n';
-
   text += `\n[추가 입력]\n${advanced ? advanced : '없음'}\n\n[의심 질환(추천)]\n`;
   text += finalDiseases.length ? finalDiseases.map(d=>`- ${d}`).join('\n') + '\n' : '- 없음\n';
-
   text += `\n[권장 진료과]\n${[...depts].length ? [...depts].map(d=>`- ${d}`).join('\n') : '- 일반 외래(필요시 응급평가)'}\n\n`;
-
   text += `[요청]\n위 정보를 바탕으로 다음을 알려주세요:\n1) 가능한 진단(상위 5개)과 각각의 근거(증상과의 연결)\n2) 응급 여부 판단 기준(언제 즉시 응급실로 가야 하는지)\n3) 우선순위 검사(1→2→3)와 각 검사의 목적\n4) 환자가 의료진에게 할 핵심 문장 3개\n5) 권장 진료과(과명) 및 이유(한 문장)\n\n참고: 이 도구는 의학적 진단을 대신하지 않으며, 응급 증상(호흡곤란·의식저하·심한 흉통 등)이 있으면 즉시 응급실로 가야 합니다.`;
 
-  // 클립보드 복사 시도
   try{
     await navigator.clipboard.writeText(text);
     showCopyNote(true);
   }catch(e){
-    showCopyNote(false, '클립보드 복사 실패 — 아래에서 수동 복사하세요.');
-    // fallback: open modal with textarea
+    showCopyNote(false, '클립보드 복사 실패');
     openDetail('GPT에 붙여넣을 텍스트', '');
-    const ta = document.createElement('textarea');
-    ta.style.width = '100%';
-    ta.style.minHeight = '220px';
-    ta.value = text;
+    const textarea = document.createElement('textarea');
+    textarea.style.width = '100%';
+    textarea.style.minHeight = '220px';
+    textarea.value = text;
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'generate-fallback';
     btn.innerText = '텍스트 복사';
-    btn.addEventListener('click', async ()=>{
-      try{ await navigator.clipboard.writeText(ta.value); showCopyNote(true); }catch(err){ ta.select(); showCopyNote(false, '자동 복사 불가 — Ctrl/Cmd+C로 복사하세요.'); }
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(textarea.value);
+        showCopyNote(true);
+      } catch (err) {
+        textarea.select();
+        showCopyNote(false, '자동 복사 불가 — Ctrl/Cmd+C로 복사하세요.');
+      }
     });
     detailContent.innerHTML = '';
-    detailContent.appendChild(ta);
+    detailContent.appendChild(textarea);
     detailContent.appendChild(document.createElement('br'));
     detailContent.appendChild(btn);
     detailTitle.innerText = 'GPT에 붙여넣을 텍스트 (수동복사)';
     return;
   }
 
-  // 성공 또는 실패와 관계없이 모달에 요약 표시
   openDetail('GPT에 붙여넣을 텍스트', text);
   detailTitle.innerText = 'GPT에 붙여넣을 텍스트';
 }
@@ -389,4 +360,3 @@ function showCopyNote(success=true, msg=''){
 document.addEventListener('DOMContentLoaded', ()=>{
   loadData();
 });
-
