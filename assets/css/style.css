@@ -57,7 +57,7 @@ button.generate-fallback{margin-top:8px;padding:8px 10px;border-radius:8px;backg
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2147483647;
+  z-index: 2147483646;
   pointer-events: none;
 }
 .ad-overlay .kakao_ad_area {
@@ -77,9 +77,9 @@ button.generate-fallback{margin-top:8px;padding:8px 10px;border-radius:8px;backg
   cursor: pointer;
   pointer-events: auto;
 }
-/* 빨간 대체 박스 (요청 색상) */
+/* 빨간 대체 박스 (요청하신 강조 색상) */
 .ad-fallback-red {
-  background: #ff4d4f;
+  background: #ff4d4f; /* 밝은 빨강 */
   color: #fff;
   border-radius: 8px;
   padding: 12px;
