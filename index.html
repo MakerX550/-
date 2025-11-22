@@ -107,14 +107,7 @@
       </div>
 
       <div style="margin-top:12px" class="section-title">광고(우측)</div>
-      <div class="ad-slot" id="kakao-ad-slot">
-        <!-- 카카오 광고 인서트: 실제 배포 전 카카오 관리자에서 단위 확인 필요 -->
-        <ins class="kakao_ad_area"
-             style="display:none;"
-             data-ad-unit="DAN-zaoVahGFL19x5VCC"
-             data-ad-width="160"
-             data-ad-height="600"></ins>
-      </div>
+      <div class="ad-slot">광고 슬롯 (우측)</div>
     </div>
 
   </div>
@@ -132,8 +125,85 @@
   <div class="content" id="detailContent"></div>
 </div>
 
-<!-- 카카오 광고 스크립트 (페이지에 한 번만 포함) -->
+<!-- 전면 왼쪽 고정 광고 오버레이 (모든 UI 앞에 위치) -->
+<div class="ad-overlay" id="global-ad-overlay" role="complementary" aria-label="광고 영역">
+  <button class="ad-close" id="adCloseBtn" aria-label="광고 닫기">✕</button>
+  <ins class="kakao_ad_area"
+       style="display:none;"
+       data-ad-unit="DAN-zaoVahGFL19x5VCC"
+       data-ad-width="160"
+       data-ad-height="600"></ins>
+  <div class="ad-fallback-red" id="adFallback" style="display:none;">
+    광고 영역 — 현재 광고가 준비되지 않았습니다.
+  </div>
+</div>
+
+<!-- 카카오 광고 스크립트 (한 번만 포함) -->
 <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+
+<!-- 광고 초기화 / 닫기 / 대체 콘텐츠 처리 -->
+<script>
+(async function setupGlobalAd(){
+  const overlay = document.getElementById('global-ad-overlay');
+  const ins = overlay.querySelector('.kakao_ad_area');
+  const fallback = document.getElementById('adFallback');
+  const closeBtn = document.getElementById('adCloseBtn');
+  const STORAGE_KEY = 'globalAdClosed_v1';
+
+  if(localStorage.getItem(STORAGE_KEY) === '1'){
+    overlay.style.display = 'none';
+    return;
+  }
+
+  function ensureBa(){
+    return new Promise((resolve)=>{
+      const existing = Array.from(document.scripts).find(s=>s.src && s.src.includes('t1.daumcdn.net'));
+      if(existing) {
+        if(existing.readyState === 'complete' || existing.readyState === 'loaded') return resolve(true);
+        existing.addEventListener('load', ()=>resolve(true));
+        existing.addEventListener('error', ()=>resolve(false));
+        return;
+      }
+      const s = document.createElement('script');
+      s.src = "//t1.daumcdn.net/kas/static/ba.min.js";
+      s.async = true;
+      s.onload = ()=> resolve(true);
+      s.onerror = ()=> resolve(false);
+      document.head.appendChild(s);
+    });
+  }
+
+  const ok = await ensureBa();
+  if(ok){
+    ins.style.display = 'block';
+  } else {
+    ins.style.display = 'none';
+    fallback.style.display = 'block';
+  }
+
+  setTimeout(()=> {
+    const rendered = ins.querySelectorAll('iframe, img').length > 0;
+    if(!rendered){
+      ins.style.display = 'none';
+      fallback.style.display = 'block';
+    } else {
+      fallback.style.display = 'none';
+    }
+  }, 4500);
+
+  closeBtn.addEventListener('click', ()=> {
+    overlay.style.display = 'none';
+    localStorage.setItem(STORAGE_KEY, '1');
+  });
+
+  document.addEventListener('keydown', (e)=> {
+    if(e.key === 'Escape'){
+      overlay.style.display = 'none';
+      localStorage.setItem(STORAGE_KEY, '1');
+    }
+  });
+})();
+</script>
 
 <script src="assets/js/app.js"></script>
 </body>
