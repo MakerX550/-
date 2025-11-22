@@ -26,7 +26,7 @@
 
   <div class="layout">
 
-    <!-- LEFT: 설정 + 좌측 고정 광고 슬롯 -->
+    <!-- LEFT: 설정 -->
     <div class="card">
       <div class="section-title">1) 검사 설정</div>
 
@@ -73,8 +73,8 @@
         </div>
       </div>
 
-      <div class="ad-slot ad-slot-left" id="kakao-ad-left" style="margin-top:16px">
-        <!-- 좌측 광고 슬롯 -->
+      <div class="ad-slot" id="kakao-ad-left" style="margin-top:16px">
+        <!-- 좌측 광고 슬롯: 여기에 광고 인서트가 들어갑니다 -->
         <ins class="kakao_ad_area"
              style="display:none;"
              data-ad-unit="DAN-zaoVahGFL19x5VCC"
@@ -108,7 +108,7 @@
       <div style="margin-top:12px" class="muted">우클릭 또는 모바일 롱프레스 → 증상별 상세 설명 보기</div>
     </div>
 
-    <!-- RIGHT: 고급 입력 & 추천 & 우측 광고 -->
+    <!-- RIGHT: 고급 입력 & 질환 추천 & 광고 -->
     <div class="card">
       <div class="section-title">3) 고급 입력 / 의심 질환(자동 추천)</div>
       <div class="muted">직접 증상 입력 또는 자동 추천된 의심 질환을 확인하세요.</div>
@@ -147,60 +147,24 @@
 <!-- 카카오 광고 스크립트 (페이지에 한 번만 포함) -->
 <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
 
-<!-- 광고 초기화·지연 로드 스크립트 -->
+<!-- 광고 인서트 활성화 스크립트: ba.min.js 로드 후 ins 표시 보장 -->
 <script>
-(function initKakaoAds(){
-  const LEFT_ID = 'kakao-ad-left';
-  const RIGHT_ID = 'kakao-ad-right';
-
-  function ensureBaScript(){
-    if(Array.from(document.scripts).some(s=>s.src && s.src.includes('t1.daumcdn.net'))) return Promise.resolve();
-    return new Promise((resolve)=>{
-      const s = document.createElement('script');
-      s.src = "//t1.daumcdn.net/kas/static/ba.min.js";
-      s.async = true;
-      s.onload = resolve;
-      s.onerror = ()=>{ console.warn('[KAKAO-AD] ba.min.js load failed'); resolve(); };
-      document.head.appendChild(s);
-    });
-  }
-
+(function ensureKakaoAdVisible(){
   function showIns(id){
     const ins = document.querySelector('#' + id + ' .kakao_ad_area');
     if(!ins) return;
     ins.style.display = 'block';
   }
-
-  function observeAndLoad(){
-    const el = document.getElementById(LEFT_ID);
-    if(!el) return;
-    const io = new IntersectionObserver((entries, obs)=>{
-      entries.forEach(async entry=>{
-        if(entry.isIntersecting){
-          await ensureBaScript();
-          showIns(LEFT_ID);
-          obs.unobserve(el);
-        }
-      });
-    }, {root: null, rootMargin: '400px 0px'});
-    io.observe(el);
-  }
-
   window.addEventListener('load', ()=>{
-    setTimeout(()=> {
-      showIns(LEFT_ID);
-      showIns(RIGHT_ID);
-    }, 800);
-    observeAndLoad();
+    setTimeout(()=>{ showIns('kakao-ad-left'); showIns('kakao-ad-right'); }, 800);
   });
-
   ['kakao-ad-left','kakao-ad-right'].forEach(id=>{
     const slot = document.getElementById(id);
-    if(!slot) return;
-    const mo = new MutationObserver(()=> showIns(id));
-    mo.observe(slot, {childList:true, subtree:true});
+    if(slot){
+      const mo = new MutationObserver(()=> showIns(id));
+      mo.observe(slot, {childList:true, subtree:true});
+    }
   });
-
 })();
 </script>
 
